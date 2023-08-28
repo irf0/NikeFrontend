@@ -8,18 +8,24 @@ import {
 } from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import products from "../data/products";
 import Icon from "react-native-vector-icons/SimpleLineIcons";
 import SearchIcon from "react-native-vector-icons/AntDesign";
 import logo from "../assets/download.png";
 import { useNavigation } from "@react-navigation/native";
+import { useDispatch, useSelector } from "react-redux";
+import { productSlice } from "../redux/productSlice";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
+  const products = useSelector((state) => state.products.products);
+  const cart = useSelector((state) => state.cart.items);
+  const dispatch = useDispatch();
 
-  const handlePress = (product) => {
-    navigation.navigate("ProductDetailScreen", { product });
+  const handlePress = (itemId) => {
+    dispatch(productSlice.actions.setSelectedProduct(itemId));
+    navigation.navigate("ProductDetailScreen", { itemId });
   };
+
   return (
     <SafeAreaView>
       {/* Navbar */}
@@ -28,6 +34,7 @@ const HomeScreen = () => {
           display: "flex",
           flexDirection: "row",
           justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
         <SearchIcon
@@ -46,7 +53,32 @@ const HomeScreen = () => {
             gap: 10,
           }}
         >
-          <Icon name="bag" size={22} color="#000" />
+          {/* Shopping bag icon */}
+          <View style={{ flexDirection: "row" }}>
+            <Icon
+              name="bag"
+              size={30}
+              color="#000"
+              onPress={() => navigation.navigate("CartScreen")}
+              style={{
+                position: "absolute",
+                marginLeft: -10,
+                alignItems: "center",
+              }}
+            />
+            <Text
+              style={{
+                position: "relative",
+                fontSize: 16,
+                alignSelf: "center",
+                marginTop: 7,
+                textAlign: "center",
+                fontWeight: "bold",
+              }}
+            >
+              {cart.length}
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -58,11 +90,10 @@ const HomeScreen = () => {
             style={{
               width: "50%",
               padding: 1,
-              borderRadius: 20,
               margin: 3,
             }}
           >
-            <TouchableOpacity onPress={() => handlePress(item)}>
+            <TouchableOpacity onPress={() => handlePress(item.id)}>
               <Image source={{ uri: item.image }} style={styles.image} />
               <View style={{ marginHorizontal: 10 }}>
                 <Text style={{ fontSize: 20, fontWeight: "600" }}>
@@ -85,6 +116,8 @@ const styles = StyleSheet.create({
   itemContainer: {
     width: "50%",
     padding: 2,
+    shadowColor: "gray",
+    shadowOffset: 15,
   },
   image: {
     width: "100%",
