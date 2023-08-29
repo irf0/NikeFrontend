@@ -4,15 +4,24 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
 import { useRoute } from "@react-navigation/native";
+import {
+  CardField,
+  initPaymentSheet,
+  presentPaymentSheet,
+  useStripe,
+} from "@stripe/stripe-react-native";
 import RazorpayCheckout from "react-native-razorpay";
 import { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } from "@env";
 
 const AddressScreen = () => {
+  const { confirmPayment } = useStripe();
+  const [amount, setAmount] = useState(1000);
   const cartItems = useSelector((state) => state.cart.items);
   const route = useRoute();
   const subtotal = route.params.subtotal;
@@ -22,9 +31,6 @@ const AddressScreen = () => {
   const [add1, setAdd1] = useState("");
   const [add2, setAdd2] = useState("");
   const [pincode, setPincode] = useState("");
-
-  let razorpayId = RAZORPAY_KEY_ID;
-  let razorpaySecret = RAZORPAY_KEY_SECRET;
 
   const handleNameChange = (text) => {
     setName(text);
@@ -48,31 +54,74 @@ const AddressScreen = () => {
     setPincode(text);
   };
 
-  let options = {
-    description: "Buy Nike App",
-    image: "https://i.imgur.com/3g7nmJC.jpg",
-    currency: "INR",
-    key: "rzp_test_TJWo5vFdtHOs3i",
-    amount: subtotal * 100,
-    name: "Nike",
-    order_id: "",
-    prefill: {
-      email: "gaurav.kumar@example.com",
-      contact: "9191919191",
-      name: "Gaurav Kumar",
-    },
-    theme: { color: "#53a20e" },
+  // Default payment amount in cents (e.g., $10)
+
+  const handlePayment = async () => {
+    // Create a payment intent
+    const response = await fetch("http://192.168.43.25:3000/payments/intents", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ amount: Math.floor(subtotal * 100) }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      Alert.alert("Something went wrong", errorData.message);
+      return;
+    }
+
+    const responseBody = await response.json();
+    console.log(responseBody);
+
+    // 2. Initialize the Payment sheet
+    const { error: paymentSheetError } = await initPaymentSheet({
+      merchantDisplayName: "Example, Inc.",
+      paymentIntentClientSecret: responseBody.paymentIntent,
+    });
+    if (paymentSheetError) {
+      Alert.alert("Something went wrong", paymentSheetError.message);
+      return;
+    }
+
+    //3.Present the payment sheet
+    await presentPaymentSheet();
+
+    //4.If payment is ok create the order and save in DB.
+    onCreateOrder();
   };
-  const handlePayment = () => {
-    RazorpayCheckout.open(options)
-      .then((data) => {
-        // handle success
-        console.log(`Success: ${data.razorpay_payment_id}`);
-      })
-      .catch((error) => {
-        // handle failure
-        console.log(error.message);
-      });
+
+  const onCreateOrder = async () => {
+    const result = await fetch("http://192.168.43.25:3000/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        items: cartItems,
+        subtotal,
+
+        customer: {
+          name: name,
+          email: email,
+          mobileNum: phoneNum,
+          address: add1,
+          pincode: pincode,
+        },
+      }),
+    });
+    const resultBody = await result.json();
+
+    if (result?.ok) {
+      Alert.alert(
+        "Order has been submitted",
+        `Your order reference is "${resultBody.data.ref}"`
+      );
+      console.log(resultBody.data);
+    } else if (!result.ok) {
+      Alert.alert("Something went wrong there...");
+    }
   };
 
   return (
@@ -120,7 +169,9 @@ const AddressScreen = () => {
         />
       </View>
 
-      <TouchableOpacity style={styles.orderBtn} onPress={() => handlePayment()}>
+      <View></View>
+
+      <TouchableOpacity style={styles.orderBtn} onPress={handlePayment}>
         <Text style={styles.btnText}>Place Order</Text>
       </TouchableOpacity>
     </SafeAreaView>
