@@ -1,12 +1,4 @@
-import {
-  View,
-  Text,
-  FlatList,
-  Image,
-  TouchableOpacity,
-  Button,
-  StyleSheet,
-} from "react-native";
+import { View, Text, FlatList } from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/AntDesign";
@@ -17,8 +9,8 @@ import ShoppingTotal from "../components/ShoppingTotal";
 
 const CartScreen = () => {
   const cartItems = useSelector((state) => state.cart.items);
+  console.log(cartItems.newItem);
   const navigation = useNavigation();
-
   return (
     <SafeAreaView>
       <View
@@ -46,14 +38,28 @@ const CartScreen = () => {
         </View>
       </View>
 
-      <View>
-        <FlatList
-          style={{ marginBottom: 100 }}
-          data={cartItems}
-          renderItem={({ item }) => <CartItemList item={item} />}
-          ListFooterComponent={ShoppingTotal}
-        />
-      </View>
+      {cartItems.length > 0 ? (
+        <View>
+          <FlatList
+            style={{ marginBottom: 100 }}
+            data={cartItems}
+            renderItem={({ item }) => <CartItemList item={item} />}
+            ListFooterComponent={ShoppingTotal}
+          />
+        </View>
+      ) : (
+        <View style={{ justifyContent: "center", alignSelf: "center" }}>
+          <Text
+            style={{
+              textAlignVertical: "center",
+              fontSize: 26,
+              fontWeight: "bold",
+            }}
+          >
+            Nothing in cart... 😐!
+          </Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 };

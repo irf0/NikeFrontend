@@ -9,36 +9,42 @@ import { decreaseQuantity, increaseQuantity } from "../redux/cartSlice";
 const CartItemList = ({ item }) => {
   const dispatch = useDispatch();
 
-  const handleIncreaseQty = (item) => {
-    dispatch(increaseQuantity(item));
+  const handleIncreaseQty = (itemId) => {
+    dispatch(increaseQuantity(itemId));
   };
-  const handleDecreaseQty = (item) => {
-    dispatch(decreaseQuantity(item));
+  const handleDecreaseQty = (itemId) => {
+    dispatch(decreaseQuantity(itemId));
   };
 
   return (
     <>
       <View style={styles.itemContainer}>
         <Image
-          source={{ uri: item.image }}
+          source={{ uri: item.newItem.image }}
           height={120}
           width={120}
           style={{ borderRadius: 10 }}
         />
 
         <View style={styles.detailsContainer}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.price}>${item.price * item.quantity}</Text>
+          <Text style={styles.name}>{item.newItem.name}</Text>
+          <Text style={styles.price}>
+            ${item.newItem.price * item.quantity}
+          </Text>
 
           <View style={styles.quantityContainer}>
-            <TouchableOpacity onPress={() => handleDecreaseQty(item.id)}>
-              <PlusIcon name="minus" size={32} />
+            <TouchableOpacity
+              onPress={() => handleDecreaseQty(item.newItem._id)}
+            >
+              <MinusIcon name="minus" size={32} />
             </TouchableOpacity>
 
             <Text style={{ fontSize: 18 }}>{item.quantity}</Text>
 
-            <TouchableOpacity onPress={() => handleIncreaseQty(item.id)}>
-              <MinusIcon name="plus" size={32} />
+            <TouchableOpacity
+              onPress={() => handleIncreaseQty(item.newItem._id)}
+            >
+              <PlusIcon name="plus" size={32} />
             </TouchableOpacity>
           </View>
         </View>

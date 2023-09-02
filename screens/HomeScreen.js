@@ -6,24 +6,45 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Icon from "react-native-vector-icons/SimpleLineIcons";
+import BagIcon from "react-native-vector-icons/SimpleLineIcons";
 import SearchIcon from "react-native-vector-icons/AntDesign";
+import HomeIcon from "react-native-vector-icons/AntDesign";
+import HeartIcon from "react-native-vector-icons/AntDesign";
+import TruckIcon from "react-native-vector-icons/Feather";
 import logo from "../assets/download.png";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import { productSlice } from "../redux/productSlice";
+import { getProducts } from "../apis/products";
 
 const HomeScreen = () => {
+  const [allProductsData, setAllProductsData] = useState([]);
   const navigation = useNavigation();
-  const products = useSelector((state) => state.products.products);
   const cart = useSelector((state) => state.cart.items);
   const dispatch = useDispatch();
 
+  //Fetch all the products from the server
+  const fetchProductsData = async () => {
+    const productsData = await getProducts();
+    if (productsData) {
+      setAllProductsData(productsData);
+    } else {
+      console.log("Error fetching products data");
+    }
+  };
+  useEffect(() => {
+    fetchProductsData();
+  }, []);
+
   const handlePress = (itemId) => {
-    dispatch(productSlice.actions.setSelectedProduct(itemId));
+    dispatch(productSlice.actions.setSelectedProduct(allProductsData));
     navigation.navigate("ProductDetailScreen", { itemId });
+  };
+
+  const handleNav = () => {
+    navigation.navigate("TrackOrderScreen");
   };
 
   return (
@@ -33,57 +54,16 @@ const HomeScreen = () => {
         style={{
           display: "flex",
           flexDirection: "row",
-          justifyContent: "space-between",
+          justifyContent: "center",
           alignItems: "center",
         }}
       >
-        <SearchIcon
-          name="search1"
-          size={22}
-          color="#000"
-          style={{ marginLeft: 6 }}
-        />
-
         <Image source={logo} style={{ height: 50, width: 130 }} />
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            marginHorizontal: 10,
-            gap: 10,
-          }}
-        >
-          {/* Shopping bag icon */}
-          <View style={{ flexDirection: "row" }}>
-            <Icon
-              name="bag"
-              size={30}
-              color="#000"
-              onPress={() => navigation.navigate("CartScreen")}
-              style={{
-                position: "absolute",
-                marginLeft: -10,
-                alignItems: "center",
-              }}
-            />
-            <Text
-              style={{
-                position: "relative",
-                fontSize: 16,
-                alignSelf: "center",
-                marginTop: 7,
-                textAlign: "center",
-                fontWeight: "bold",
-              }}
-            >
-              {cart.length}
-            </Text>
-          </View>
-        </View>
       </View>
 
       <FlatList
-        data={products}
+        data={allProductsData.data}
+        style={{ marginBottom: 135 }}
         renderItem={({ item }) => (
           <View
             key={item.id}
@@ -93,12 +73,26 @@ const HomeScreen = () => {
               margin: 3,
             }}
           >
-            <TouchableOpacity onPress={() => handlePress(item.id)}>
+            <TouchableOpacity onPress={() => handlePress(item._id)}>
               <Image source={{ uri: item.image }} style={styles.image} />
               <View style={{ marginHorizontal: 10 }}>
-                <Text style={{ fontSize: 20, fontWeight: "600" }}>
-                  {item.name}
-                </Text>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      fontWeight: "600",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    {item.name}
+                  </Text>
+                </View>
+
                 <Text style={{ fontSize: 17, fontWeight: "600" }}>
                   $ {item.price}
                 </Text>
@@ -108,6 +102,39 @@ const HomeScreen = () => {
         )}
         numColumns={2}
       />
+
+      {/* Bottom Icons */}
+      <View activeOpacity={0.9} style={styles.iconsContainer}>
+        <TouchableOpacity onPress={() => navigation.navigate("HomeScreen")}>
+          <HomeIcon name="home" size={25} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <SearchIcon name="search1" size={25} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("CartScreen")}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <BagIcon
+              name="bag"
+              size={36}
+              color="white"
+              style={{ position: "absolute" }}
+            />
+            <Text style={styles.cartText}>{cart.length}</Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleNav}>
+          <TruckIcon name="truck" size={25} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <HeartIcon name="hearto" size={25} color="white" />
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
@@ -122,6 +149,26 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     aspectRatio: 1,
+  },
+  iconsContainer: {
+    position: "absolute",
+    padding: 20,
+    bottom: 65,
+    width: "98%",
+    borderRadius: 6,
+    backgroundColor: "black",
+    alignSelf: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  cartText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: -5,
+    color: "white",
+    textAlign: "center",
+    textAlignVertical: "center",
   },
 });
 

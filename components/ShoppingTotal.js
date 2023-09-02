@@ -8,15 +8,12 @@ import {
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 
-const CREATE_ORDER_URL = "http://127.0.0.1:3000/orders";
-const CREATE_PAYMENT_INTENT_URL = "http://127.0.0.1:3000/payments/intents";
-
 const ShoppingTotal = () => {
   const navigation = useNavigation();
   const cart = useSelector((state) => state.cart.items);
 
   const subtotal = cart.reduce(
-    (acc, item) => acc + item.price * item.quantity,
+    (acc, item) => acc + item.newItem.price * item.quantity,
     0
   );
 
@@ -74,7 +71,7 @@ const styles = StyleSheet.create({
     color: "#6b6a69",
   },
   checkoutBtn: {
-    padding: 10,
+    padding: 16,
     alignSelf: "center",
     justifyContent: "center",
     backgroundColor: "black",
@@ -87,7 +84,7 @@ const styles = StyleSheet.create({
   checkoutBtnText: {
     color: "white",
     textAlign: "center",
-    fontSize: 18,
+    fontSize: 21,
   },
 });
 

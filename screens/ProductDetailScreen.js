@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Pressable,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/AntDesign";
@@ -17,14 +17,39 @@ import { useDispatch, useSelector } from "react-redux";
 import { addItemToCart } from "../redux/cartSlice";
 
 const ProductDetailScreen = () => {
+  const [oneProduct, setOneProduct] = useState([]);
   const route = useRoute();
   const id = route.params.itemId;
   const navigation = useNavigation();
   const dispatch = useDispatch();
-
-  const productState = useSelector((state) => state.products.selectedProduct);
   const cart = useSelector((state) => state.cart.items);
   const { width } = useWindowDimensions();
+
+  //Fetch one specific product from the server
+  const getProduct = async () => {
+    try {
+      const response = await fetch(`http://192.168.43.25:3000/products/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log(errorData);
+      }
+
+      const productsData = await response.json();
+      setOneProduct(productsData.data);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  useEffect(() => {
+    getProduct();
+  }, []);
 
   const handleAddToCart = (productId) => {
     dispatch(addItemToCart(productId));
@@ -46,37 +71,36 @@ const ProductDetailScreen = () => {
             onPress={navigation.goBack}
           />
 
-          <View style={{ flexDirection: "row" }}>
-            <BagIcon
-              name="bag"
-              size={30}
-              color="#000"
-              onPress={() => navigation.navigate("CartScreen")}
-              style={{
-                position: "absolute",
-                marginLeft: -35,
-                alignItems: "center",
-              }}
-            />
-            <Text
-              style={{
-                position: "relative",
-                fontSize: 16,
-                alignSelf: "center",
-                marginTop: -7,
-                marginLeft: -25,
-                textAlign: "center",
-                fontWeight: "bold",
-              }}
-            >
-              {cart.length}
-            </Text>
-          </View>
+          <BagIcon
+            name="bag"
+            size={30}
+            color="#000"
+            style={{
+              position: "absolute",
+              right: 10,
+              marginBottom: -7,
+            }}
+            onPress={() => navigation.navigate("CartScreen")}
+          />
+          <Text
+            style={{
+              fontSize: 16,
+              position: "absolute",
+              right: 20,
+              marginTop: 7,
+              fontWeight: "bold",
+              color: "black",
+              textAlign: "center",
+              textAlignVertical: "center",
+            }}
+          >
+            {cart.length}
+          </Text>
         </View>
 
         {/* Image Carousel */}
         <FlatList
-          data={productState.images}
+          data={oneProduct.images}
           renderItem={({ item }) => (
             <Image
               source={{ uri: item }}
@@ -97,7 +121,7 @@ const ProductDetailScreen = () => {
               marginLeft: 20,
             }}
           >
-            {productState.name}
+            {oneProduct.name}
           </Text>
 
           {/* Price */}
@@ -109,7 +133,7 @@ const ProductDetailScreen = () => {
               marginLeft: 20,
             }}
           >
-            ${productState.price}
+            ${oneProduct.price}
           </Text>
 
           {/* Description */}
@@ -122,14 +146,14 @@ const ProductDetailScreen = () => {
               flexWrap: "wrap",
             }}
           >
-            {productState.description}
+            {oneProduct.description}
           </Text>
         </View>
       </ScrollView>
 
       {/* Add to Cart Button */}
       <TouchableOpacity
-        onPress={() => handleAddToCart(id)}
+        onPress={() => handleAddToCart(oneProduct)}
         activeOpacity={0.9}
         style={{
           position: "absolute",

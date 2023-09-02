@@ -1,5 +1,3 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
@@ -10,6 +8,7 @@ import store from "./redux/storeSlice";
 import CartScreen from "./screens/CartScreen";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import AddressScreen from "./screens/AddressScreen";
+import TrackOrderScreen from "./screens/TrackOrderScreen";
 
 const Stack = createNativeStackNavigator();
 const STRIPE_KEY =
@@ -27,12 +26,18 @@ export default function App() {
               }}
             >
               <Stack.Screen name="HomeScreen" component={HomeScreen} />
+
               <Stack.Screen
                 name="ProductDetailScreen"
                 component={ProductDetailScreen}
               />
               <Stack.Screen name="CartScreen" component={CartScreen} />
               <Stack.Screen name="AddressScreen" component={AddressScreen} />
+              <Stack.Screen
+                name="TrackOrderScreen"
+                component={TrackOrderScreen}
+                options={{ presentation: "modal" }}
+              />
             </Stack.Navigator>
           </SafeAreaProvider>
         </NavigationContainer>

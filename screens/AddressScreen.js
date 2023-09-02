@@ -9,17 +9,16 @@ import {
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
-import { useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import ArrowIcon from "react-native-vector-icons/AntDesign";
 import {
-  CardField,
   initPaymentSheet,
   presentPaymentSheet,
   useStripe,
 } from "@stripe/stripe-react-native";
-import RazorpayCheckout from "react-native-razorpay";
-import { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } from "@env";
 
 const AddressScreen = () => {
+  const navigation = useNavigation();
   const { confirmPayment } = useStripe();
   const [amount, setAmount] = useState(1000);
   const cartItems = useSelector((state) => state.cart.items);
@@ -73,7 +72,6 @@ const AddressScreen = () => {
     }
 
     const responseBody = await response.json();
-    console.log(responseBody);
 
     // 2. Initialize the Payment sheet
     const { error: paymentSheetError } = await initPaymentSheet({
@@ -86,12 +84,20 @@ const AddressScreen = () => {
     }
 
     //3.Present the payment sheet
-    await presentPaymentSheet();
+    const paymentResponse = await presentPaymentSheet();
+    if (paymentResponse.error) {
+      Alert.alert(
+        `Error Code: ${paymentResponse.error.code}`,
+        paymentResponse.error.message
+      );
+      return;
+    }
 
     //4.If payment is ok create the order and save in DB.
     onCreateOrder();
   };
 
+  //Creating a new order and saving to DB (post request).
   const onCreateOrder = async () => {
     const result = await fetch("http://192.168.43.25:3000/orders", {
       method: "POST",
@@ -100,7 +106,7 @@ const AddressScreen = () => {
       },
       body: JSON.stringify({
         items: cartItems,
-        subtotal,
+        subtotal: subtotal,
 
         customer: {
           name: name,
@@ -118,7 +124,6 @@ const AddressScreen = () => {
         "Order has been submitted",
         `Your order reference is "${resultBody.data.ref}"`
       );
-      console.log(resultBody.data);
     } else if (!result.ok) {
       Alert.alert("Something went wrong there...");
     }
@@ -126,6 +131,13 @@ const AddressScreen = () => {
 
   return (
     <SafeAreaView>
+      <ArrowIcon
+        name="arrowleft"
+        size={25}
+        color="#000"
+        style={{ margin: 10 }}
+        onPress={navigation.goBack}
+      />
       <View style={styles.container}>
         <Text style={styles.pageHeader}>Add Your Name and Address</Text>
         <TextInput
@@ -169,9 +181,7 @@ const AddressScreen = () => {
         />
       </View>
 
-      <View></View>
-
-      <TouchableOpacity style={styles.orderBtn} onPress={handlePayment}>
+      <TouchableOpacity style={styles.orderBtn} onPress={onCreateOrder}>
         <Text style={styles.btnText}>Place Order</Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -181,7 +191,6 @@ const AddressScreen = () => {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    marginTop: 20,
   },
   input: {
     borderColor: "gray",
