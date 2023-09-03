@@ -8,27 +8,34 @@ import {
   TextInput,
   View,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getOrderStatus } from "../apis/orders";
 import TrackOrderFooter from "../components/TrackOrderFooter";
 import Icon from "react-native-vector-icons/AntDesign";
-import { useNavigation } from "@react-navigation/native";
+import SearchIcon from "react-native-vector-icons/AntDesign";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 const TrackOrderScreen = () => {
+  const route = useRoute();
+  const orderRefFromUserScreen = route?.params?.orderReference;
   const [orderStatusData, setOrderStatusData] = useState();
   const [orderId, setOrderId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [displayOrderId, setDisplayOrderId] = useState(false);
   const [showErrorMsg, setshowErrorMsg] = useState(false);
+  const [orderRefFromUser, setOrderRefFromUser] = useState(
+    orderRefFromUserScreen
+  );
   const navigation = useNavigation();
 
   const fetchOrderStatus = async () => {
     setIsLoading(true);
-    const ordersData = await getOrderStatus(orderId);
+    const ordersData = await getOrderStatus(
+      orderId ? orderId : orderRefFromUser
+    );
     if (ordersData) {
       setOrderStatusData(ordersData);
-      console.log(orderStatusData);
       setDisplayOrderId(true);
       setshowErrorMsg(false);
       setIsLoading(false);
@@ -37,6 +44,13 @@ const TrackOrderScreen = () => {
       setIsLoading(false);
     }
   };
+
+  if (orderRefFromUser) {
+    useEffect(() => {
+      fetchOrderStatus();
+    }, []);
+  }
+
   const itemsArray = orderStatusData?.data?.items || [];
 
   //For sending to the Footer Component
@@ -65,9 +79,16 @@ const TrackOrderScreen = () => {
           placeholder="Enter Order ID"
           onChangeText={textInputChange}
           onSubmitEditing={fetchOrderStatus}
-          value={orderId}
+          value={orderId ? orderId : orderRefFromUser}
           returnKeyType="search"
           style={styles.idInput}
+        />
+        <SearchIcon
+          style={styles.seachIcon}
+          name="search1"
+          size={25}
+          color="black"
+          onPress={fetchOrderStatus}
         />
 
         {isLoading && (
@@ -79,7 +100,9 @@ const TrackOrderScreen = () => {
       {orderStatusData && displayOrderId && (
         <>
           <View style={styles.orderIdContainer}>
-            <Text style={styles.orderIdText}>Order ID : {orderId}</Text>
+            <Text style={styles.orderIdText}>
+              Order ID : {orderId ? orderId : orderRefFromUser}
+            </Text>
           </View>
 
           <FlatList
@@ -137,6 +160,15 @@ const styles = StyleSheet.create({
     width: "90%",
     marginTop: 20,
     marginLeft: 20,
+    position: "absolute",
+    justifyContent: "flex-end",
+    alignItems: "center",
+  },
+  seachIcon: {
+    alignSelf: "flex-end",
+    marginRight: 23,
+    marginTop: 28,
+    fontWeight: "bold",
   },
   loader: {
     alignSelf: "center",

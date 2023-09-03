@@ -5,12 +5,13 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BagIcon from "react-native-vector-icons/SimpleLineIcons";
 import SearchIcon from "react-native-vector-icons/AntDesign";
-import HomeIcon from "react-native-vector-icons/AntDesign";
+import UserIcon from "react-native-vector-icons/AntDesign";
 import HeartIcon from "react-native-vector-icons/AntDesign";
 import TruckIcon from "react-native-vector-icons/Feather";
 import logo from "../assets/download.png";
@@ -43,8 +44,15 @@ const HomeScreen = () => {
     navigation.navigate("ProductDetailScreen", { itemId });
   };
 
-  const handleNav = () => {
+  const handleNavToTrackScreen = () => {
     navigation.navigate("TrackOrderScreen");
+  };
+  const handleNavToSearchScreen = () => {
+    navigation.navigate("SearchProductScreen");
+  };
+
+  const handlePressOnHeart = () => {
+    Alert.alert("Feature under development!");
   };
 
   return (
@@ -58,7 +66,7 @@ const HomeScreen = () => {
           alignItems: "center",
         }}
       >
-        <Image source={logo} style={{ height: 50, width: 130 }} />
+        <Image source={logo} style={{ height: 60, width: 150 }} />
       </View>
 
       <FlatList
@@ -105,20 +113,15 @@ const HomeScreen = () => {
 
       {/* Bottom Icons */}
       <View activeOpacity={0.9} style={styles.iconsContainer}>
-        <TouchableOpacity onPress={() => navigation.navigate("HomeScreen")}>
-          <HomeIcon name="home" size={25} color="white" />
+        <TouchableOpacity onPress={handlePressOnHeart}>
+          <HeartIcon name="hearto" size={25} color="white" />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleNavToSearchScreen}>
           <SearchIcon name="search1" size={25} color="white" />
         </TouchableOpacity>
+
         <TouchableOpacity onPress={() => navigation.navigate("CartScreen")}>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
+          <View style={styles.bagIconContainer}>
             <BagIcon
               name="bag"
               size={36}
@@ -128,11 +131,14 @@ const HomeScreen = () => {
             <Text style={styles.cartText}>{cart.length}</Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleNav}>
+        <TouchableOpacity onPress={handleNavToTrackScreen}>
           <TruckIcon name="truck" size={25} color="white" />
         </TouchableOpacity>
-        <TouchableOpacity>
-          <HeartIcon name="hearto" size={25} color="white" />
+
+        <TouchableOpacity
+          onPress={() => navigation.navigate("UserProfileScreen")}
+        >
+          <UserIcon name="user" size={28} color="white" />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -169,6 +175,11 @@ const styles = StyleSheet.create({
     color: "white",
     textAlign: "center",
     textAlignVertical: "center",
+  },
+  bagIconContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

@@ -15,6 +15,7 @@ import Icon from "react-native-vector-icons/AntDesign";
 import BagIcon from "react-native-vector-icons/SimpleLineIcons";
 import { useDispatch, useSelector } from "react-redux";
 import { addItemToCart } from "../redux/cartSlice";
+import { getProduct } from "../apis/products";
 
 const ProductDetailScreen = () => {
   const [oneProduct, setOneProduct] = useState([]);
@@ -26,29 +27,17 @@ const ProductDetailScreen = () => {
   const { width } = useWindowDimensions();
 
   //Fetch one specific product from the server
-  const getProduct = async () => {
-    try {
-      const response = await fetch(`http://192.168.43.25:3000/products/${id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.log(errorData);
-      }
-
-      const productsData = await response.json();
-      setOneProduct(productsData.data);
-    } catch (error) {
-      console.log(error.message);
+  const fetchProductInfo = async () => {
+    const productInfoData = await getProduct(id);
+    if (productInfoData) {
+      setOneProduct(productInfoData.data);
+    } else {
+      console.log("Error fetching products data");
     }
   };
 
   useEffect(() => {
-    getProduct();
+    fetchProductInfo();
   }, []);
 
   const handleAddToCart = (productId) => {

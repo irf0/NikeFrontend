@@ -1,11 +1,11 @@
-export const getOrderStatus = async (orderId) => {
+export const searchProducts = async (searchTerm) => {
   try {
     const response = await fetch(
-      `https://nikeappbackend-production.up.railway.app/orders/${orderId}`,
+      `https://nikeappbackend-production.up.railway.app/products/search?key=${searchTerm}`,
       {
-        method: "GET",
+        method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          Accept: "*/*",
         },
       }
     );
@@ -15,8 +15,8 @@ export const getOrderStatus = async (orderId) => {
       return null;
     }
 
-    const ordersData = await response.json();
-    return ordersData;
+    const searchData = await response.json();
+    return searchData;
   } catch (error) {
     console.error("An error occurred:", error);
     return null;

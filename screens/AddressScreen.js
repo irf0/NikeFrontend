@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  Platform,
 } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,6 +17,7 @@ import {
   presentPaymentSheet,
   useStripe,
 } from "@stripe/stripe-react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AddressScreen = () => {
   const navigation = useNavigation();
@@ -30,6 +32,7 @@ const AddressScreen = () => {
   const [add1, setAdd1] = useState("");
   const [add2, setAdd2] = useState("");
   const [pincode, setPincode] = useState("");
+  const [orderRef, setOrderRef] = useState("");
 
   const handleNameChange = (text) => {
     setName(text);
@@ -57,13 +60,16 @@ const AddressScreen = () => {
 
   const handlePayment = async () => {
     // Create a payment intent
-    const response = await fetch("http://192.168.43.25:3000/payments/intents", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ amount: Math.floor(subtotal * 100) }),
-    });
+    const response = await fetch(
+      "https://nikeappbackend-production.up.railway.app/payments/intents",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ amount: Math.floor(subtotal * 100) }),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -99,31 +105,35 @@ const AddressScreen = () => {
 
   //Creating a new order and saving to DB (post request).
   const onCreateOrder = async () => {
-    const result = await fetch("http://192.168.43.25:3000/orders", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        items: cartItems,
-        subtotal: subtotal,
-
-        customer: {
-          name: name,
-          email: email,
-          mobileNum: phoneNum,
-          address: add1,
-          pincode: pincode,
+    const result = await fetch(
+      "https://nikeappbackend-production.up.railway.app/orders",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      }),
-    });
-    const resultBody = await result.json();
+        body: JSON.stringify({
+          items: cartItems,
+          subtotal: subtotal,
 
-    if (result?.ok) {
-      Alert.alert(
-        "Order has been submitted",
-        `Your order reference is "${resultBody.data.ref}"`
-      );
+          customer: {
+            name: name,
+            email: email,
+            mobileNum: phoneNum,
+            address: add1,
+            pincode: pincode,
+          },
+        }),
+      }
+    );
+    const resultBody = await result.json();
+    setOrderRef(resultBody);
+    const orderReference = orderRef?.data?.ref;
+
+    if (result?.ok && orderReference) {
+      // Store the order reference locally
+      await AsyncStorage.setItem("orderReference", orderReference);
+      Alert.alert(`Your order is placed with ${orderReference}`);
     } else if (!result.ok) {
       Alert.alert("Something went wrong there...");
     }

@@ -9,7 +9,6 @@ import ShoppingTotal from "../components/ShoppingTotal";
 
 const CartScreen = () => {
   const cartItems = useSelector((state) => state.cart.items);
-  console.log(cartItems.newItem);
   const navigation = useNavigation();
   return (
     <SafeAreaView>

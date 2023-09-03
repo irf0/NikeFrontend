@@ -1,11 +1,6 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
 import { useSelector } from "react-redux";
-import {
-  useCreateOrderMutation,
-  useCreatePaymentIntentMutation,
-} from "../redux/apiSlice";
-import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 
 const ShoppingTotal = () => {

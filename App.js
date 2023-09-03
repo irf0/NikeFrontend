@@ -9,6 +9,8 @@ import CartScreen from "./screens/CartScreen";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import AddressScreen from "./screens/AddressScreen";
 import TrackOrderScreen from "./screens/TrackOrderScreen";
+import SearchProductScreen from "./screens/SearchProductScreen";
+import UserProfileScreen from "./screens/UserProfileScreen";
 
 const Stack = createNativeStackNavigator();
 const STRIPE_KEY =
@@ -33,10 +35,19 @@ export default function App() {
               />
               <Stack.Screen name="CartScreen" component={CartScreen} />
               <Stack.Screen name="AddressScreen" component={AddressScreen} />
+
+              <Stack.Screen
+                name="SearchProductScreen"
+                component={SearchProductScreen}
+              />
               <Stack.Screen
                 name="TrackOrderScreen"
                 component={TrackOrderScreen}
                 options={{ presentation: "modal" }}
+              />
+              <Stack.Screen
+                name="UserProfileScreen"
+                component={UserProfileScreen}
               />
             </Stack.Navigator>
           </SafeAreaProvider>
