@@ -43,7 +43,6 @@ export default function App() {
               <Stack.Screen
                 name="TrackOrderScreen"
                 component={TrackOrderScreen}
-                options={{ presentation: "modal" }}
               />
               <Stack.Screen
                 name="UserProfileScreen"

@@ -33,6 +33,9 @@ const AddressScreen = () => {
   const [add2, setAdd2] = useState("");
   const [pincode, setPincode] = useState("");
   const [orderRef, setOrderRef] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [pincodeError, setPincodeError] = useState("");
 
   const handleNameChange = (text) => {
     setName(text);
@@ -54,6 +57,37 @@ const AddressScreen = () => {
   };
   const handlePinCodeChange = (text) => {
     setPincode(text);
+  };
+
+  //Validate the form before submission
+  const validateForm = () => {
+    let isValid = true;
+
+    if (!name) {
+      isValid = false;
+      setNameError("Name is required");
+      Alert.alert("Name is required!");
+    } else {
+      setNameError("");
+    }
+
+    if (!email) {
+      isValid = false;
+      setEmailError("Email is required");
+      Alert.alert("Email is required!");
+    } else {
+      setEmailError("");
+    }
+
+    if (!/^\d{6}$/.test(pincode)) {
+      isValid = false;
+      setPincodeError("Pincode should not exceed 6 numbers!");
+      Alert.alert("Pincode should not exceed 6 numbers!");
+    } else {
+      setPincodeError("");
+    }
+
+    return isValid;
   };
 
   // Default payment amount in cents (e.g., $10)
@@ -105,37 +139,39 @@ const AddressScreen = () => {
 
   //Creating a new order and saving to DB (post request).
   const onCreateOrder = async () => {
-    const result = await fetch(
-      "https://nikeappbackend-production.up.railway.app/orders",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          items: cartItems,
-          subtotal: subtotal,
-
-          customer: {
-            name: name,
-            email: email,
-            mobileNum: phoneNum,
-            address: add1,
-            pincode: pincode,
+    if (validateForm()) {
+      const result = await fetch(
+        "https://nikeappbackend-production.up.railway.app/orders",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        }),
-      }
-    );
-    const resultBody = await result.json();
-    setOrderRef(resultBody);
-    const orderReference = orderRef?.data?.ref;
+          body: JSON.stringify({
+            items: cartItems,
+            subtotal: subtotal,
 
-    if (result?.ok && orderReference) {
-      // Store the order reference locally
-      await AsyncStorage.setItem("orderReference", orderReference);
-      Alert.alert(`Your order is placed with ${orderReference}`);
-    } else if (!result.ok) {
-      Alert.alert("Something went wrong there...");
+            customer: {
+              name: name,
+              email: email,
+              mobileNum: phoneNum,
+              address: add1,
+              pincode: pincode,
+            },
+          }),
+        }
+      );
+      const resultBody = await result.json();
+      setOrderRef(resultBody);
+      const orderReference = orderRef?.data?.ref;
+
+      if (result?.ok && orderReference) {
+        // Store the order reference locally
+        await AsyncStorage.setItem("orderReference", orderReference);
+        Alert.alert(`Your order is placed with ${orderReference}`);
+      } else if (!result.ok) {
+        Alert.alert("Something went wrong there...");
+      }
     }
   };
 
