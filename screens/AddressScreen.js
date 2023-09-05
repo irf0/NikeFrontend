@@ -122,8 +122,11 @@ const AddressScreen = () => {
         // Store the order reference locally
         await AsyncStorage.setItem("orderReference", orderReference);
         Alert.alert(
-          `Your Payment was Successful & your order is placed with ${orderReference}`
+          `Your Payment was Successful. Your order id is "${orderReference}"`
         );
+        setTimeout(() => {
+          navigation.navigate("HomeScreen");
+        }, 2000);
       } else if (!result.ok) {
         Alert.alert("Something went wrong there...");
       }
@@ -170,13 +173,10 @@ const AddressScreen = () => {
 
     if (error) {
       Alert.alert(`Error code: ${error.code}`, error.message);
-    } else {
-      Alert.alert("Success", "Your order is confirmed!");
     }
 
     //4.If payment is ok create the order and save in DB.
     onCreateOrder();
-    navigation.navigate("HomeScreen");
   };
 
   return (
