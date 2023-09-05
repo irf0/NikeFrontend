@@ -38,7 +38,7 @@ export const cartSlice = createSlice({
     //decQty
     decreaseQuantity(state, action) {
       const itemId = action.payload;
-      const item = state.items.find((item) => item.newItem.id === itemId);
+      const item = state.items.find((item) => item.newItem._id === itemId);
       if (item.quantity > 1) {
         item.quantity -= 1;
       }

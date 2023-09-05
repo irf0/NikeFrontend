@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import ArrowIcon from "react-native-vector-icons/AntDesign";
 import {
@@ -18,6 +18,7 @@ import {
   useStripe,
 } from "@stripe/stripe-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import cartSlice from "../redux/cartSlice";
 
 const AddressScreen = () => {
   const navigation = useNavigation();
@@ -36,6 +37,7 @@ const AddressScreen = () => {
   const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [pincodeError, setPincodeError] = useState("");
+  const dispatch = useDispatch();
 
   const handleNameChange = (text) => {
     setName(text);
@@ -126,7 +128,8 @@ const AddressScreen = () => {
         );
         setTimeout(() => {
           navigation.navigate("HomeScreen");
-        }, 2000);
+        }, 500);
+        dispatch(cartSlice.actions.clear());
       } else if (!result.ok) {
         Alert.alert("Something went wrong there...");
       }
