@@ -18,7 +18,7 @@ import {
   useStripe,
 } from "@stripe/stripe-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import cartSlice from "../redux/cartSlice";
+import cartSlice, { clear, clearCart } from "../redux/cartSlice";
 
 const AddressScreen = () => {
   const navigation = useNavigation();
@@ -38,6 +38,7 @@ const AddressScreen = () => {
   const [emailError, setEmailError] = useState("");
   const [pincodeError, setPincodeError] = useState("");
   const dispatch = useDispatch();
+  const cart = useSelector((state) => state.cart);
 
   const handleNameChange = (text) => {
     setName(text);
@@ -128,8 +129,8 @@ const AddressScreen = () => {
         );
         setTimeout(() => {
           navigation.navigate("HomeScreen");
+          dispatch(clearCart());
         }, 500);
-        dispatch(cartSlice.actions.clear());
       } else if (!result.ok) {
         Alert.alert("Something went wrong there...");
       }
@@ -234,7 +235,7 @@ const AddressScreen = () => {
         />
       </View>
 
-      <TouchableOpacity style={styles.orderBtn} onPress={handlePayment}>
+      <TouchableOpacity style={styles.orderBtn} onPress={onCreateOrder}>
         <Text style={styles.btnText}>Place Order</Text>
       </TouchableOpacity>
     </SafeAreaView>
