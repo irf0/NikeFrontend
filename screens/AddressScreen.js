@@ -90,6 +90,48 @@ const AddressScreen = () => {
     return isValid;
   };
 
+  //Creating a new order and saving to DB (post request).
+  const onCreateOrder = async () => {
+    if (validateForm()) {
+      const result = await fetch(
+        "https://nikeappbackend-production.up.railway.app/orders",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            items: cartItems,
+            subtotal: subtotal,
+
+            customer: {
+              name: name,
+              email: email,
+              mobileNum: phoneNum,
+              address: add1,
+              pincode: pincode,
+            },
+          }),
+        }
+      );
+      const resultBody = await result.json();
+      setOrderRef(resultBody);
+      const orderReference = orderRef?.data?.ref;
+
+      if (result?.ok && orderReference) {
+        // Store the order reference locally
+        await AsyncStorage.setItem("orderReference", orderReference);
+        Alert.alert(
+          `Your Payment was Successful & your order is placed with ${orderReference}`
+        );
+      } else if (!result.ok) {
+        Alert.alert("Something went wrong there...");
+      }
+    } else {
+      Alert.alert("Make sure no required field left empty! ");
+    }
+  };
+
   // Default payment amount in cents (e.g., $10)
 
   const handlePayment = async () => {
@@ -124,55 +166,17 @@ const AddressScreen = () => {
     }
 
     //3.Present the payment sheet
-    const paymentResponse = await presentPaymentSheet();
-    if (paymentResponse.error) {
-      Alert.alert(
-        `Error Code: ${paymentResponse.error.code}`,
-        paymentResponse.error.message
-      );
-      return;
+    const { error } = await presentPaymentSheet();
+
+    if (error) {
+      Alert.alert(`Error code: ${error.code}`, error.message);
+    } else {
+      Alert.alert("Success", "Your order is confirmed!");
     }
 
     //4.If payment is ok create the order and save in DB.
     onCreateOrder();
-  };
-
-  //Creating a new order and saving to DB (post request).
-  const onCreateOrder = async () => {
-    if (validateForm()) {
-      const result = await fetch(
-        "https://nikeappbackend-production.up.railway.app/orders",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            items: cartItems,
-            subtotal: subtotal,
-
-            customer: {
-              name: name,
-              email: email,
-              mobileNum: phoneNum,
-              address: add1,
-              pincode: pincode,
-            },
-          }),
-        }
-      );
-      const resultBody = await result.json();
-      setOrderRef(resultBody);
-      const orderReference = orderRef?.data?.ref;
-
-      if (result?.ok && orderReference) {
-        // Store the order reference locally
-        await AsyncStorage.setItem("orderReference", orderReference);
-        Alert.alert(`Your order is placed with ${orderReference}`);
-      } else if (!result.ok) {
-        Alert.alert("Something went wrong there...");
-      }
-    }
+    navigation.navigate("HomeScreen");
   };
 
   return (
@@ -227,7 +231,7 @@ const AddressScreen = () => {
         />
       </View>
 
-      <TouchableOpacity style={styles.orderBtn} onPress={onCreateOrder}>
+      <TouchableOpacity style={styles.orderBtn} onPress={handlePayment}>
         <Text style={styles.btnText}>Place Order</Text>
       </TouchableOpacity>
     </SafeAreaView>

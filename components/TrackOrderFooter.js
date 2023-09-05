@@ -14,7 +14,7 @@ const TrackOrderFooter = ({ deliveryDetails }) => {
       </View>
       <View>
         <Text style={styles.subtotalText}>Subtotal</Text>
-        <Text style={styles.subtotalAmt}>${deliveryDetails.subtotal}</Text>
+        <Text style={styles.subtotalAmt}>₹{deliveryDetails.subtotal}</Text>
       </View>
     </View>
   );

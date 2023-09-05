@@ -26,9 +26,9 @@ const ShoppingTotal = () => {
         </View>
 
         <View>
-          <Text style={styles.subtotalText}> ${subtotal}</Text>
-          <Text style={styles.deliveryText}> {"$50"}</Text>
-          <Text style={styles.totalText}> ${subtotal + 50}</Text>
+          <Text style={styles.subtotalText}> ₹{subtotal}</Text>
+          <Text style={styles.deliveryText}> {"₹50"}</Text>
+          <Text style={styles.totalText}> ₹{subtotal + 50}</Text>
         </View>
       </View>
 

@@ -122,7 +122,7 @@ const ProductDetailScreen = () => {
               marginLeft: 20,
             }}
           >
-            ${oneProduct.price}
+            ₹{oneProduct.price}
           </Text>
 
           {/* Description */}

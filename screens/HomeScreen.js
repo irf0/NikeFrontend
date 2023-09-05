@@ -8,7 +8,7 @@ import {
   Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
+
 import BagIcon from "react-native-vector-icons/SimpleLineIcons";
 import SearchIcon from "react-native-vector-icons/AntDesign";
 import UserIcon from "react-native-vector-icons/AntDesign";
@@ -19,6 +19,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import { productSlice } from "../redux/productSlice";
 import { getProducts } from "../apis/products";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const HomeScreen = () => {
   const [allProductsData, setAllProductsData] = useState([]);
@@ -102,7 +103,7 @@ const HomeScreen = () => {
                 </View>
 
                 <Text style={{ fontSize: 17, fontWeight: "600" }}>
-                  $ {item.price}
+                  ₹ {item.price}
                 </Text>
               </View>
             </TouchableOpacity>

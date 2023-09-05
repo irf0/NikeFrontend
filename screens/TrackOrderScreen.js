@@ -127,7 +127,7 @@ const TrackOrderScreen = () => {
                 </View>
 
                 <View>
-                  <Text style={styles.price}>${item?.newItem?.price}</Text>
+                  <Text style={styles.price}>₹{item?.newItem?.price}</Text>
                 </View>
               </View>
             )}

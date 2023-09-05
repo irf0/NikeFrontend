@@ -29,7 +29,7 @@ const CartItemList = ({ item }) => {
         <View style={styles.detailsContainer}>
           <Text style={styles.name}>{item.newItem.name}</Text>
           <Text style={styles.price}>
-            ${item.newItem.price * item.quantity}
+            ₹{item.newItem.price * item.quantity}
           </Text>
 
           <View style={styles.quantityContainer}>
